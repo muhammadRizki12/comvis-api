@@ -1,6 +1,9 @@
 const bcrypt = require("bcrypt");
-
 const { store, findUserByEmail } = require("../models/UserModel");
+const dotenv = require("dotenv");
+const jwt = require("jsonwebtoken");
+
+dotenv.config();
 
 const register = async (req, res) => {
   try {
@@ -47,16 +50,34 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    res.status(200).json({
+    // payload
+    const payload = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    };
+
+    // secret key
+    const secret = process.env.JWT_SECRET;
+
+    // expire
+    const expireIn = 60 * 60 * 1;
+
+    // Create token JWT
+    const token = jwt.sign(payload, secret, { expiresIn: expireIn });
+
+    return res.status(200).send({
       data: {
+        id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
       },
-      message: "Login successful",
+      token,
     });
   } catch (error) {
-    res.status(500).json({ error: "An error occurred during login" });
+    res.status(401).json({ message: "Invalid credentials" });
   }
 };
 
