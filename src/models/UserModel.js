@@ -1,5 +1,11 @@
 const prisma = require("../config/db");
 
+const findUserById = async (id) => {
+  return await prisma.users.findUnique({
+    where: { id },
+  });
+};
+
 const findUserByEmail = async (email) => {
   return await prisma.users.findUnique({
     where: { email },
@@ -19,4 +25,29 @@ const store = async (userData) => {
   return user;
 };
 
-module.exports = { findUserByEmail, store };
+// edit
+const edit = async (userData) => {
+  const { id, name, email } = userData;
+  console.log(id);
+
+  const user = await prisma.users.update({
+    where: {
+      id,
+    },
+
+    data: {
+      name,
+      email,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+    },
+  });
+
+  return user;
+};
+
+module.exports = { findUserByEmail, findUserById, store, edit };

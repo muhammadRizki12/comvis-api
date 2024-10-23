@@ -20,7 +20,7 @@ const authenticateJWT = (req, res, next) => {
 
     // decode token
     const jwtDecode = jwt.verify(token, secret);
-    req.userData = jwtDecode;
+    req.user = jwtDecode;
   } catch (error) {
     return res.status(401).json({
       message: "Unauthorized",
