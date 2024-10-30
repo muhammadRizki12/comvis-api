@@ -34,8 +34,7 @@ const store = async (userData) => {
 
 // edit
 const edit = async (userData) => {
-  const { id, name, email } = userData;
-  console.log(id);
+  const { id, name, email, password } = userData;
 
   const user = await prisma.users.update({
     where: {
@@ -45,6 +44,7 @@ const edit = async (userData) => {
     data: {
       name,
       email,
+      password,
     },
     select: {
       id: true,

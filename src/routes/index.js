@@ -1,5 +1,9 @@
 const express = require("express");
-const { register, login } = require("../controllers/AuthController");
+const {
+  register,
+  login,
+  resetPassword,
+} = require("../controllers/AuthController");
 const authenticateJWT = require("../middleware/authenticateJWT");
 const {
   showProfile,
@@ -11,6 +15,7 @@ const router = express.Router();
 // auth
 router.post("/login", login);
 router.post("/register", register);
+router.put("/resetPassword", resetPassword);
 
 router.get("/users", authenticateJWT, showProfile);
 

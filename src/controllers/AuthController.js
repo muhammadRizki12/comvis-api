@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const { store, findUserByEmail } = require("../models/UserModel");
+const { store, findUserByEmail, edit } = require("../models/UserModel");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 
@@ -29,7 +29,7 @@ const register = async (req, res) => {
     // respon
     res.status(201).send({
       data: user,
-      message: "user register success",
+      message: "reset password success",
     });
   } catch (error) {
     res.status(400).send(error.message);
@@ -82,4 +82,38 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { login, register };
+const resetPassword = async (req, res) => {
+  try {
+    const { email, password, security_answer } = req.body;
+
+    if (!(email && password && security_answer)) {
+      return res.status(400).send("Some fields are missing");
+    }
+
+    // get user by email
+    const user = await findUserByEmail(email);
+    const id = user.id;
+
+    // Validasi security answer
+    if (!(security_answer == user.security_answer)) {
+      return res.status(401).json({ message: "Invalid security answer" });
+    }
+
+    // change pass new
+    const passwordNewHashing = await bcrypt.hash(password, 10);
+    const userNewPass = await edit({ id, password: passwordNewHashing });
+
+    if (!userNewPass) {
+      return res.status(401).json({ message: "Failed register" });
+    }
+
+    // respon
+    res.status(201).send({
+      data: userNewPass,
+      message: "user register success",
+    });
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
+};
+module.exports = { login, register, resetPassword };
