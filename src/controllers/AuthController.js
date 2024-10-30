@@ -110,7 +110,7 @@ const resetPassword = async (req, res) => {
     // respon
     res.status(201).send({
       data: userNewPass,
-      message: "user register success",
+      message: "Reset Password Success",
     });
   } catch (error) {
     res.status(400).send(error.message);
