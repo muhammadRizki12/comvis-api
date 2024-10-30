@@ -7,10 +7,10 @@ dotenv.config();
 
 const register = async (req, res) => {
   try {
-    const { email, name, password } = req.body;
+    const { email, name, password, security_answer } = req.body;
 
     // Check
-    if (!(email && name && password)) {
+    if (!(email && name && password && security_answer)) {
       return res.status(400).send("Some fields are missing");
     }
 
@@ -20,6 +20,7 @@ const register = async (req, res) => {
       name,
       email,
       password: passwordHashing,
+      security_answer,
     };
 
     // insert database

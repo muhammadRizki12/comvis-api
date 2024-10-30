@@ -19,6 +19,13 @@ const store = async (userData) => {
       email: userData.email,
       password: userData.password,
       role: "user",
+      security_answer: userData.security_answer,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
     },
   });
 

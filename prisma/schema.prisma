@@ -19,4 +19,5 @@ model users {
   password String
   name String
   role String
+  security_answer String
 }
