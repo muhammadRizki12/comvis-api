@@ -11,7 +11,7 @@ const register = async (req, res) => {
 
     // Check
     if (!(email && name && password && security_answer)) {
-      return res.status(400).send("Some fields are missing");
+      throw new Error("Some fields are missing");
     }
 
     const passwordHashing = await bcrypt.hash(password, 10);
@@ -27,12 +27,14 @@ const register = async (req, res) => {
     const user = await store(newUser);
 
     // respon
-    res.status(201).send({
+    res.status(200).send({
       data: user,
-      message: "reset password success",
+      message: "Register Success",
     });
   } catch (error) {
-    res.status(400).send(error.message);
+    res.status(error.code || 400).send({
+      message: error.message,
+    });
   }
 };
 const login = async (req, res) => {
@@ -42,13 +44,13 @@ const login = async (req, res) => {
     const user = await findUserByEmail(email);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      throw new Error("User not found");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      throw new Error("Invalid email or password");
     }
 
     // payload
@@ -78,7 +80,9 @@ const login = async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(401).json({ message: "Invalid credentials" });
+    res.status(error.code || 400).send({
+      message: error.message,
+    });
   }
 };
 
@@ -87,7 +91,7 @@ const resetPassword = async (req, res) => {
     const { email, password, security_answer } = req.body;
 
     if (!(email && password && security_answer)) {
-      return res.status(400).send("Some fields are missing");
+      throw new Error("Some fields are missing");
     }
 
     // get user by email
@@ -96,7 +100,7 @@ const resetPassword = async (req, res) => {
 
     // Validasi security answer
     if (!(security_answer == user.security_answer)) {
-      return res.status(401).json({ message: "Invalid security answer" });
+      throw new Error("Invalid security answer");
     }
 
     // change pass new
@@ -104,16 +108,18 @@ const resetPassword = async (req, res) => {
     const userNewPass = await edit({ id, password: passwordNewHashing });
 
     if (!userNewPass) {
-      return res.status(401).json({ message: "Failed register" });
+      throw new Error("Failed register");
     }
 
     // respon
-    res.status(201).send({
+    res.status(200).send({
       data: userNewPass,
       message: "Reset Password Success",
     });
   } catch (error) {
-    res.status(400).send(error.message);
+    res.status(error.code || 400).send({
+      message: error.message,
+    });
   }
 };
 module.exports = { login, register, resetPassword };

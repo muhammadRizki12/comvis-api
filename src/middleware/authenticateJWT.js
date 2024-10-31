@@ -9,9 +9,7 @@ const authenticateJWT = (req, res, next) => {
     const { authorization } = req.headers;
 
     if (!authorization) {
-      return res.status(401).json({
-        mesage: "Token required",
-      });
+      throw new Error("Token required!");
     }
 
     // Ambil token dari headers
@@ -22,8 +20,8 @@ const authenticateJWT = (req, res, next) => {
     const jwtDecode = jwt.verify(token, secret);
     req.user = jwtDecode;
   } catch (error) {
-    return res.status(401).json({
-      message: "Unauthorized",
+    res.status(error.code || 400).send({
+      message: error.message,
     });
   }
   next();

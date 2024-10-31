@@ -22,13 +22,12 @@ const editUserProfile = async (req, res) => {
     // update data
     const updateUser = await edit({ id, email, name });
 
-    res.status(200).json({
+    res.status(200).send({
       status: "success",
       data: updateUser,
     });
   } catch (error) {
-    res.status(500).json({
-      status: "error",
+    res.status(error.code || 400).send({
       message: error.message,
     });
   }
@@ -40,7 +39,7 @@ const editPassword = async (req, res) => {
     const id = req.user.id;
 
     if (!(oldPassword && newPassword)) {
-      return res.status(400).send("Some fields are missing");
+      throw new Error("Some fields are missing");
     }
 
     const user = await findUserById(id);
@@ -49,7 +48,7 @@ const editPassword = async (req, res) => {
     const isOldPasswordValid = await bcrypt.compare(newPassword, user.password);
 
     if (!isOldPasswordValid) {
-      return res.status(401).json({ message: "Invalid old password" });
+      throw new Error("Invalid old password");
     }
 
     // hashing
@@ -58,16 +57,18 @@ const editPassword = async (req, res) => {
     // edit password
     const userNewPass = await edit({ id, password: newPasswordHashing });
     if (!userNewPass) {
-      return res.status(401).json({ message: "Failed edit password" });
+      throw new Error("Failed edit password");
     }
 
     // respon
-    res.status(201).send({
+    res.status(200).send({
       data: userNewPass,
       message: "Edit Password Success",
     });
   } catch (error) {
-    res.status(400).send(error.message);
+    res.status(error.code || 400).send({
+      message: error.message,
+    });
   }
 };
 
