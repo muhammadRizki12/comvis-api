@@ -9,7 +9,13 @@ dotenv.config();
 
 const PORT = process.env.PORT;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // middleware use json response
 app.use(express.json());

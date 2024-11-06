@@ -1,5 +1,16 @@
 const prisma = require("../config/db");
 
+const getAllUsers = async () => {
+  return await prisma.users.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+    },
+  });
+};
+
 const findUserById = async (id) => {
   return await prisma.users.findUnique({
     where: { id },
@@ -57,4 +68,36 @@ const edit = async (userData) => {
   return user;
 };
 
-module.exports = { findUserByEmail, findUserById, store, edit };
+const destroy = async (id) => {
+  const user = await prisma.users.delete({
+    where: {
+      id,
+    },
+  });
+
+  return user;
+};
+
+const checkEmailDuplicate = async (email) => {
+  const user = await prisma.users.findUnique({
+    where: {
+      email: email.toLowerCase(), // Convert ke lowercase untuk konsistensi
+    },
+    select: {
+      id: true,
+      email: true,
+    },
+  });
+
+  return user;
+};
+
+module.exports = {
+  findUserByEmail,
+  findUserById,
+  store,
+  edit,
+  destroy,
+  getAllUsers,
+  checkEmailDuplicate,
+};

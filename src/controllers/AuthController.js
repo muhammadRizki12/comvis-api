@@ -1,5 +1,10 @@
 const bcrypt = require("bcrypt");
-const { store, findUserByEmail, edit } = require("../models/UserModel");
+const {
+  store,
+  findUserByEmail,
+  edit,
+  checkEmailDuplicate,
+} = require("../models/UserModel");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 
@@ -12,6 +17,10 @@ const register = async (req, res) => {
     // Check
     if (!(email && name && password && security_answer)) {
       throw new Error("Some fields are missing");
+    }
+
+    if (!checkEmailDuplicate(email)) {
+      throw new Error("Email is exist!");
     }
 
     const passwordHashing = await bcrypt.hash(password, 10);
@@ -32,11 +41,12 @@ const register = async (req, res) => {
       message: "Register Success",
     });
   } catch (error) {
-    res.status(error.code || 400).send({
+    res.status(400).send({
       message: error.message,
     });
   }
 };
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -44,13 +54,13 @@ const login = async (req, res) => {
     const user = await findUserByEmail(email);
 
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("Email not found");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new Error("Invalid email or password");
+      throw new Error("Invalid password");
     }
 
     // payload
@@ -80,7 +90,7 @@ const login = async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(error.code || 400).send({
+    res.status(400).send({
       message: error.message,
     });
   }
@@ -88,9 +98,9 @@ const login = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
-    const { email, password, security_answer } = req.body;
+    const { email, newPassword, security_answer } = req.body;
 
-    if (!(email && password && security_answer)) {
+    if (!(email && newPassword && security_answer)) {
       throw new Error("Some fields are missing");
     }
 
@@ -104,7 +114,7 @@ const resetPassword = async (req, res) => {
     }
 
     // change pass new
-    const passwordNewHashing = await bcrypt.hash(password, 10);
+    const passwordNewHashing = await bcrypt.hash(newPassword, 10);
     const userNewPass = await edit({ id, password: passwordNewHashing });
 
     if (!userNewPass) {
@@ -117,7 +127,7 @@ const resetPassword = async (req, res) => {
       message: "Reset Password Success",
     });
   } catch (error) {
-    res.status(error.code || 400).send({
+    res.status(400).send({
       message: error.message,
     });
   }

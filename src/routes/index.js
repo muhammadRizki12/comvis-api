@@ -4,11 +4,16 @@ const {
   login,
   resetPassword,
 } = require("../controllers/AuthController");
-const authenticateJWT = require("../middleware/authenticateJWT");
+
+// const authenticateJWT = require("../middleware/authenticateJWT");
+// const checkAdmin = require("../middleware/checkAdmin");
+const { checkAdmin, authenticateJWT } = require("../middleware");
+
 const {
   showProfile,
   editUserProfile,
   editPassword,
+  showAllUsers,
 } = require("../controllers/UserController");
 
 const router = express.Router();
@@ -18,8 +23,11 @@ router.post("/login", login);
 router.post("/register", register);
 router.patch("/resetPassword", resetPassword);
 
-router.get("/users", authenticateJWT, showProfile);
-router.patch("/users", authenticateJWT, editUserProfile);
+router.get("/admin/users", authenticateJWT, checkAdmin, showAllUsers);
+router.delete("/admin/users", authenticateJWT, checkAdmin, showAllUsers);
+
+router.get("/users/profile", authenticateJWT, showProfile);
+router.patch("/users/profile", authenticateJWT, editUserProfile);
 router.patch("/users/editPassword", authenticateJWT, editPassword);
 
 router.get("/", (req, res) => {

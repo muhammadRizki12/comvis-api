@@ -1,8 +1,57 @@
 const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
-const { findUserById, edit } = require("../models/UserModel");
+const {
+  findUserById,
+  edit,
+  getAllUsers,
+  destroy,
+} = require("../models/UserModel");
 
 dotenv.config();
+
+// Admin
+const showAllUsers = async (req, res) => {
+  try {
+    const users = await getAllUsers();
+
+    if (!users) throw new Error("Invalid Get All users");
+
+    res.status(200).send({
+      data: users,
+      message: "success",
+    });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await destroy(id);
+
+    if (!user) throw new Error("Invalid delete user");
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
+const editUser = async (req, res) => {
+  // // get id params
+  // const { id } = req.params;
+  // // get body data
+  // const { name, email, passwordAdmin, password } = req.body;
+  // // cek empty
+  // if (!(name && email && passwordAdmin && password)) {
+  // }
+};
+
+// end admin
 
 const showProfile = async (req, res) => {
   // ambil data dari JWT
@@ -72,4 +121,10 @@ const editPassword = async (req, res) => {
   }
 };
 
-module.exports = { editUserProfile, showProfile, editPassword };
+module.exports = {
+  editUserProfile,
+  showProfile,
+  editPassword,
+  showAllUsers,
+  deleteUser,
+};
