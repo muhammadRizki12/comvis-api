@@ -54,14 +54,21 @@ const editUser = async (req, res) => {
 // end admin
 
 const showProfile = async (req, res) => {
-  // ambil data dari JWT
-  const user = req.user;
+  try {
+    // ambil data dari JWT
+    const user = req.user;
 
-  // get user data dari database
-  res.status(200).send({
-    data: user,
-    message: "success",
-  });
+    if (!user) new Error("Error show profile");
+
+    res.status(200).send({
+      data: user,
+      message: "success",
+    });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
 };
 
 const editUserProfile = async (req, res) => {

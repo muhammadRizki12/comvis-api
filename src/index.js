@@ -25,3 +25,5 @@ app.use("/", router);
 app.listen(PORT, () => {
   console.log(`Running server in http://localhost:${PORT}`);
 });
+
+module.exports = app;
