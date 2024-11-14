@@ -1,9 +1,20 @@
 const express = require("express");
-const dotenv = require("dotenv");
+const http = require("http");
+
 const cors = require("cors");
+const router = require("./routes/index");
+
+const socketConfig = require("./config/socket");
+
+// package to get data in ENV
+const dotenv = require("dotenv");
 
 const app = express();
-const router = require("./routes/index");
+// create server
+const server = http.createServer(app);
+
+// create connection
+const io = socketConfig(server);
 
 dotenv.config();
 
@@ -22,8 +33,8 @@ app.use(express.json());
 
 app.use("/", router);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Running server in http://localhost:${PORT}`);
 });
 
-module.exports = app;
+module.exports = server;
