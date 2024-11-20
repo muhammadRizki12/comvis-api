@@ -1,25 +1,38 @@
 const { Server } = require("socket.io");
+const server = require("../index");
 
-const socketConfig = (server) => {
-  const io = new Server(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-    },
+const MQTTClient = require("./mqtt");
+
+const io = new Server(server, { cors: { origin: "*" } });
+
+io.on("connection", (socket) => {
+  console.log("Client connected");
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
   });
+});
 
-  io.on("connection", (socket) => {
-    console.log("Connect userid: ", socket.id);
+module.exports = io;
 
-    // event get frame frontend
-    io.on("video-frame", (frame) => {
-      // console.log(frame);
-    });
+// const socketConfig = (server) => {
+//   const io = new Server(server, {
+//     cors: {
+//       origin: "*",
+//     },
+//   });
 
-    io.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
-    });
-  });
-};
+//   io.on("connection", (socket) => {
+//     console.log("Connect userid: ", socket.id);
 
-module.exports = socketConfig;
+//     // event get frame frontend
+//     io.on("video-frames", (frame) => {
+//       client.publish("video-frames", frame);
+//     });
+
+//     io.on("disconnect", () => {
+//       console.log("User disconnected:", socket.id);
+//     });
+//   });
+// };
+
+// module.exports = socketConfig;
