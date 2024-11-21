@@ -33,7 +33,18 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 // MQTT Configuration
 const mqtt = require("mqtt");
-const client = mqtt.connect("mqtt://localhost:1883");
+
+const MQTT_BROKER = process.env.MQTT_BROKER;
+const MQTT_PORT = process.env.MQTT_PORT;
+const MQTT_USERNAME = process.env.MQTT_USERNAME;
+const MQTT_PASSWORD = process.env.MQTT_PASSWORD;
+
+// const client = mqtt.connect("mqtt://localhost:1883");
+// Membuat koneksi MQTT
+const client = mqtt.connect(`mqtts://${MQTT_BROKER}:${MQTT_PORT}`, {
+  username: MQTT_USERNAME,
+  password: MQTT_PASSWORD,
+});
 
 // connection socket io
 io.on("connection", (socket) => {
