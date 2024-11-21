@@ -59,7 +59,26 @@ client.on("connect", () => {
 client.on("message", (topic, message) => {
   if (topic === "video-analysis") {
     // Broadcast analysis results to all connected clients
-    io.emit("analysis-result", JSON.parse(message));
+    let data = JSON.parse(message);
+    let num_people = data.data.num_people;
+
+    const max_capacity = 3;
+    const q1 = Math.round(max_capacity * 0.33);
+    const q2 = Math.round(max_capacity * 0.66);
+
+    // Tentukan statusCrowd berdasarkan jumlah orang
+    const statusCrowd =
+      num_people === 0
+        ? "Kosong"
+        : num_people <= q1
+        ? "Sepi"
+        : num_people <= q2
+        ? "Sedang"
+        : num_people > max_capacity
+        ? "Over"
+        : "Padat";
+
+    io.emit("analysis-result", { ...data, statusCrowd });
   }
 });
 
