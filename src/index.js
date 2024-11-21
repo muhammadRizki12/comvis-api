@@ -29,7 +29,9 @@ app.use(express.json());
 
 // Socket IO Configuration
 const { Server } = require("socket.io");
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, {
+  cors: { origin: "*", methods: ["GET", "POST"] },
+});
 
 // MQTT Configuration
 const mqtt = require("mqtt");
