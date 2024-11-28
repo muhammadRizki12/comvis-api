@@ -14,6 +14,7 @@ const {
   editUserProfile,
   editPassword,
   showAllUsers,
+  getUserById,
 } = require("../controllers/UserController");
 
 const router = express.Router();
@@ -24,6 +25,12 @@ router.post("/register", register);
 router.patch("/resetPassword", resetPassword);
 
 router.get("/admin/users", authenticateJWT, checkAdmin, showAllUsers);
+
+// Get user by id
+router.get("/admin/users/:id", authenticateJWT, checkAdmin, getUserById);
+router.patch("/admin/users/:id", () => {});
+router.patch("/admin/users/{id}/editPassword", () => {});
+
 router.delete("/admin/users", authenticateJWT, checkAdmin, showAllUsers);
 
 router.get("/users/profile", authenticateJWT, showProfile);

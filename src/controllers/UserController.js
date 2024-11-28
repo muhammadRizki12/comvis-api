@@ -10,6 +10,24 @@ const {
 dotenv.config();
 
 // Admin
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await findUserById(id);
+    if (!user) throw new Error("Invalid Get All users");
+
+    res.status(200).send({
+      message: "success",
+      data: user,
+    });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
 const showAllUsers = async (req, res) => {
   try {
     const users = await getAllUsers();
@@ -134,4 +152,5 @@ module.exports = {
   editPassword,
   showAllUsers,
   deleteUser,
+  getUserById,
 };

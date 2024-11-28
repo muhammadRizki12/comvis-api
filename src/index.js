@@ -87,9 +87,9 @@ client.on("message", (topic, message) => {
         ? "Sepi"
         : num_people <= q2
         ? "Sedang"
-        : num_people > max_capacity
-        ? "Over"
-        : "Padat";
+        : num_people > q2
+        ? "Padat"
+        : "Over";
 
     io.emit("analysis-result", { ...data, statusCrowd });
   }
