@@ -1,20 +1,22 @@
 const express = require("express");
+
 const {
   register,
   login,
   resetPassword,
 } = require("../controllers/AuthController");
 
-// const authenticateJWT = require("../middleware/authenticateJWT");
-// const checkAdmin = require("../middleware/checkAdmin");
 const { checkAdmin, authenticateJWT } = require("../middleware");
 
 const {
+  index,
+  show,
+  destroy,
+  update,
   showProfile,
-  editUserProfile,
-  editPassword,
-  showAllUsers,
-  getUserById,
+  updateProfile,
+  updateUserPassword,
+  updateProfilePassword,
 } = require("../controllers/UserController");
 
 const router = express.Router();
@@ -24,29 +26,26 @@ router.post("/login", login);
 router.post("/register", register);
 router.patch("/resetPassword", resetPassword);
 
-router.get("/admin/users", authenticateJWT, checkAdmin, showAllUsers);
+// Admin
+router.get("/admin/users", authenticateJWT, checkAdmin, index);
+router.get("/admin/users/:id", authenticateJWT, checkAdmin, show);
+router.patch("/admin/users/:id", authenticateJWT, checkAdmin, update);
+router.patch(
+  "/admin/users/:id/editPassword",
+  authenticateJWT,
+  checkAdmin,
+  updateUserPassword
+);
+router.delete("/admin/users/:id", authenticateJWT, checkAdmin, destroy);
 
-// Get user by id
-router.get("/admin/users/:id", authenticateJWT, checkAdmin, getUserById);
-router.patch("/admin/users/:id", () => {});
-router.patch("/admin/users/{id}/editPassword", () => {});
-
-router.delete("/admin/users", authenticateJWT, checkAdmin, showAllUsers);
-
+// Users
 router.get("/users/profile", authenticateJWT, showProfile);
-router.patch("/users/profile", authenticateJWT, editUserProfile);
-router.patch("/users/editPassword", authenticateJWT, editPassword);
+router.patch("/users/profile", authenticateJWT, updateProfile);
+router.patch("/users/editPassword", authenticateJWT, updateProfilePassword);
 
 router.get("/", (req, res) => {
   return res.status(200).send({
     message: "Hello world",
-  });
-});
-
-// Endpoint yang dilindungi
-router.get("/test", authenticateJWT, async (req, res) => {
-  res.status(200).send({
-    user: req.user,
   });
 });
 

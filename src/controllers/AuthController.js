@@ -1,8 +1,8 @@
 const bcrypt = require("bcrypt");
 const {
-  store,
-  findUserByEmail,
-  edit,
+  insertUser,
+  getUserByEmail,
+  updateUser,
   checkEmailDuplicate,
 } = require("../models/UserModel");
 const dotenv = require("dotenv");
@@ -33,7 +33,7 @@ const register = async (req, res) => {
     };
 
     // insert database
-    const user = await store(newUser);
+    const user = await insertUser(newUser);
 
     // respon
     res.status(200).send({
@@ -51,7 +51,7 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await findUserByEmail(email);
+    const user = await getUserByEmail(email);
 
     if (!user) {
       throw new Error("Email not found");
@@ -105,7 +105,7 @@ const resetPassword = async (req, res) => {
     }
 
     // get user by email
-    const user = await findUserByEmail(email);
+    const user = await getUserByEmail(email);
     const id = user.id;
 
     // Validasi security answer
@@ -115,10 +115,10 @@ const resetPassword = async (req, res) => {
 
     // change pass new
     const passwordNewHashing = await bcrypt.hash(newPassword, 10);
-    const userNewPass = await edit({ id, password: passwordNewHashing });
+    const userNewPass = await updateUser({ id, password: passwordNewHashing });
 
     if (!userNewPass) {
-      throw new Error("Failed register");
+      throw new Error("Failed reset password");
     }
 
     // respon

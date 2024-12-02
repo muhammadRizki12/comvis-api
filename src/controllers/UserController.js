@@ -1,34 +1,17 @@
 const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
 const {
-  findUserById,
-  edit,
+  getUserById,
+  updateUser,
   getAllUsers,
-  destroy,
+  deleteUserById,
+  getUserPasswordById,
 } = require("../models/UserModel");
 
 dotenv.config();
 
-// Admin
-const getUserById = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const user = await findUserById(id);
-    if (!user) throw new Error("Invalid Get All users");
-
-    res.status(200).send({
-      message: "success",
-      data: user,
-    });
-  } catch (error) {
-    res.status(400).send({
-      message: error.message,
-    });
-  }
-};
-
-const showAllUsers = async (req, res) => {
+// select all
+const index = async (req, res) => {
   try {
     const users = await getAllUsers();
 
@@ -45,13 +28,19 @@ const showAllUsers = async (req, res) => {
   }
 };
 
-const deleteUser = async (req, res) => {
+// select user by id
+const show = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = await destroy(id);
+    const user = await getUserById(id);
 
-    if (!user) throw new Error("Invalid delete user");
+    if (!user) throw new Error(`Invalid Get users id: ${id}`);
+
+    res.status(200).send({
+      message: "success",
+      data: user,
+    });
   } catch (error) {
     res.status(400).send({
       message: error.message,
@@ -59,18 +48,73 @@ const deleteUser = async (req, res) => {
   }
 };
 
-const editUser = async (req, res) => {
-  // // get id params
-  // const { id } = req.params;
-  // // get body data
-  // const { name, email, passwordAdmin, password } = req.body;
-  // // cek empty
-  // if (!(name && email && passwordAdmin && password)) {
-  // }
+const destroy = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await deleteUserById(id);
+
+    if (!user) throw new Error("Invalid delete user");
+
+    res.status(200).send({
+      message: `Success delete user id: ${id}`,
+    });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
 };
 
-// end admin
+const update = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const data = req.body;
+
+    const updatedUser = await updateUser({
+      id,
+      ...data,
+    });
+
+    res.status(200).send({
+      success: true,
+      message: "User updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
+const updateUserPassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const data = req.body;
+
+    const newPasswordHashing = await bcrypt.hash(data.password, 10);
+
+    const updatedUser = await updateUser({
+      id,
+      password: newPasswordHashing,
+    });
+
+    res.status(200).send({
+      success: true,
+      message: "User updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
+// User JWT information
 const showProfile = async (req, res) => {
   try {
     // ambil data dari JWT
@@ -89,16 +133,16 @@ const showProfile = async (req, res) => {
   }
 };
 
-const editUserProfile = async (req, res) => {
+const updateProfile = async (req, res) => {
   try {
     const { email, name } = req.body;
     const { id } = req.user;
     // update data
-    const updateUser = await edit({ id, email, name });
+    const user = await updateUser({ id, email, name });
 
     res.status(200).send({
       status: "success",
-      data: updateUser,
+      data: user,
     });
   } catch (error) {
     res.status(error.code || 400).send({
@@ -107,7 +151,7 @@ const editUserProfile = async (req, res) => {
   }
 };
 
-const editPassword = async (req, res) => {
+const updateProfilePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
     const id = req.user.id;
@@ -116,10 +160,10 @@ const editPassword = async (req, res) => {
       throw new Error("Some fields are missing");
     }
 
-    const user = await findUserById(id);
+    const user = await getUserPasswordById(id);
 
     //  cek password old
-    const isOldPasswordValid = await bcrypt.compare(newPassword, user.password);
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
 
     if (!isOldPasswordValid) {
       throw new Error("Invalid old password");
@@ -129,7 +173,7 @@ const editPassword = async (req, res) => {
     const newPasswordHashing = await bcrypt.hash(newPassword, 10);
 
     // edit password
-    const userNewPass = await edit({ id, password: newPasswordHashing });
+    const userNewPass = await updateUser({ id, password: newPasswordHashing });
     if (!userNewPass) {
       throw new Error("Failed edit password");
     }
@@ -147,10 +191,12 @@ const editPassword = async (req, res) => {
 };
 
 module.exports = {
-  editUserProfile,
+  index,
+  show,
+  update,
+  updateProfile,
   showProfile,
-  editPassword,
-  showAllUsers,
-  deleteUser,
-  getUserById,
+  updateUserPassword,
+  updateProfilePassword,
+  destroy,
 };

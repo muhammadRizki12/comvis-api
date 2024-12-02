@@ -1,5 +1,6 @@
 const prisma = require("../config/db");
 
+// Mengambil seluruh data user kecuali password dan security_key
 const getAllUsers = async () => {
   return await prisma.users.findMany({
     select: {
@@ -11,26 +12,41 @@ const getAllUsers = async () => {
   });
 };
 
-const findUserById = async (id) => {
+const getUserById = async (id) => {
   return await prisma.users.findUnique({
     where: { id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      security_answer: true,
+    },
   });
 };
 
-const findUserByEmail = async (email) => {
+const getUserPasswordById = async (id) => {
+  return await prisma.users.findUnique({
+    where: { id },
+    select: { password: true },
+  });
+};
+
+const getUserByEmail = async (email) => {
   return await prisma.users.findUnique({
     where: { email },
   });
 };
 
-const store = async (userData) => {
+const insertUser = async (userData) => {
+  const { name, email, password, role, security_answer } = userData;
   const user = await prisma.users.create({
     data: {
-      name: userData.name,
-      email: userData.email,
-      password: userData.password,
+      name: name,
+      email: email,
+      password: password,
       role: "user",
-      security_answer: userData.security_answer,
+      security_answer: security_answer,
     },
     select: {
       id: true,
@@ -43,9 +59,9 @@ const store = async (userData) => {
   return user;
 };
 
-// edit
-const edit = async (userData) => {
-  const { id, name, email, password } = userData;
+// update
+const updateUser = async (userData) => {
+  const { id, name, email, password, security_answer } = userData;
 
   const user = await prisma.users.update({
     where: {
@@ -56,19 +72,20 @@ const edit = async (userData) => {
       name,
       email,
       password,
+      security_answer,
     },
     select: {
       id: true,
       name: true,
       email: true,
-      role: true,
+      security_answer: true,
     },
   });
 
   return user;
 };
 
-const destroy = async (id) => {
+const deleteUserById = async (id) => {
   const user = await prisma.users.delete({
     where: {
       id,
@@ -93,11 +110,12 @@ const checkEmailDuplicate = async (email) => {
 };
 
 module.exports = {
-  findUserByEmail,
-  findUserById,
-  store,
-  edit,
-  destroy,
+  getUserByEmail,
+  getUserById,
+  insertUser,
+  updateUser,
+  deleteUserById,
   getAllUsers,
   checkEmailDuplicate,
+  getUserPasswordById,
 };
