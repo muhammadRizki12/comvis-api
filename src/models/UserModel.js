@@ -20,7 +20,6 @@ const getUserById = async (id) => {
       email: true,
       name: true,
       role: true,
-      security_answer: true,
     },
   });
 };
