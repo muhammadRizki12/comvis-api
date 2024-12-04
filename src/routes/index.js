@@ -18,6 +18,7 @@ const {
   updateUserPassword,
   updateProfilePassword,
 } = require("../controllers/UserController");
+const AreaController = require("../controllers/AreaController");
 
 const router = express.Router();
 
@@ -42,6 +43,11 @@ router.delete("/admin/users/:id", authenticateJWT, checkAdmin, destroy);
 router.get("/users/profile", authenticateJWT, showProfile);
 router.patch("/users/profile", authenticateJWT, updateProfile);
 router.patch("/users/editPassword", authenticateJWT, updateProfilePassword);
+
+// crowds
+router.get("/areas", authenticateJWT, checkAdmin, AreaController.index);
+router.post("/areas", authenticateJWT, checkAdmin, AreaController.store);
+router.put("/areas/:id", authenticateJWT, checkAdmin, AreaController.update);
 
 router.get("/", (req, res) => {
   return res.status(200).send({

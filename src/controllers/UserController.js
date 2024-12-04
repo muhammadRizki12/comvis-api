@@ -72,15 +72,17 @@ const update = async (req, res) => {
 
     const data = req.body;
 
-    const updatedUser = await updateUser({
+    const user = await updateUser({
       id,
       ...data,
     });
 
+    if (!user) throw new Error("Failed update user!");
+
     res.status(200).send({
       success: true,
       message: "User updated successfully",
-      data: updatedUser,
+      data: user,
     });
   } catch (error) {
     res.status(400).send({

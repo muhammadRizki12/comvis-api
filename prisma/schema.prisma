@@ -21,3 +21,19 @@ model users {
   role String
   security_answer String
 }
+
+model areas {
+  id Int @id @default(autoincrement())
+  name String @unique
+  capacity Int
+  crowd crowds[]
+}
+
+model crowds {
+  id Int @id @default(autoincrement())
+  status String
+  count Int
+  timestamp DateTime
+  area_id Int
+  area areas @relation(fields: [area_id], references: [id])
+}
