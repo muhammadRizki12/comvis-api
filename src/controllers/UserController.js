@@ -120,7 +120,9 @@ const updateUserPassword = async (req, res) => {
 const showProfile = async (req, res) => {
   try {
     // ambil data dari JWT
-    const user = req.user;
+    // const user = req.user;
+    const id = req.user.id;
+    const user = await getUserById(id);
 
     if (!user) new Error("Error show profile");
 
