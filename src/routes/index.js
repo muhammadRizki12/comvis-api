@@ -48,6 +48,12 @@ router.patch("/users/editPassword", authenticateJWT, updateProfilePassword);
 router.get("/areas", authenticateJWT, checkAdmin, AreaController.index);
 router.post("/areas", authenticateJWT, checkAdmin, AreaController.store);
 router.put("/areas/:id", authenticateJWT, checkAdmin, AreaController.update);
+router.delete(
+  "/areas/:id",
+  authenticateJWT,
+  checkAdmin,
+  AreaController.destroy
+);
 
 router.get("/", (req, res) => {
   return res.status(200).send({

@@ -77,7 +77,6 @@ const updateUser = async (userData) => {
       id: true,
       name: true,
       email: true,
-      security_answer: true,
     },
   });
 

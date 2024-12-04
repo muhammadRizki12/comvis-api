@@ -33,6 +33,14 @@ const updateArea = async (areaData) => {
   return area;
 };
 
+const deleteAreaById = async (id) => {
+  const area = await prisma.areas.delete({
+    where: { id },
+  });
+
+  return area;
+};
+
 const checkNameAreaDuplicate = async (name) => {
   const area = await prisma.areas.findFirst({
     where: { name },
@@ -46,4 +54,5 @@ module.exports = {
   checkNameAreaDuplicate,
   getAllAreas,
   updateArea,
+  deleteAreaById,
 };

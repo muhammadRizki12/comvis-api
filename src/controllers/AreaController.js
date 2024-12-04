@@ -4,6 +4,7 @@ const {
   checkNameAreaDuplicate,
   getAllAreas,
   updateArea,
+  deleteAreaById,
 } = require("../models/AreaModel");
 dotenv.config();
 
@@ -82,4 +83,21 @@ const update = async (req, res) => {
   }
 };
 
-module.exports = { store, index, update };
+const destroy = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const area = await deleteAreaById(parseInt(id));
+    if (!area) throw new Error("Invalid delete area");
+
+    res.status(200).send({
+      message: `Success delete area id: ${id}`,
+    });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { store, index, update, destroy };
