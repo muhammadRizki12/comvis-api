@@ -45,7 +45,8 @@ router.patch("/users/profile", authenticateJWT, updateProfile);
 router.patch("/users/editPassword", authenticateJWT, updateProfilePassword);
 
 // crowds
-router.get("/areas", authenticateJWT, checkAdmin, AreaController.index);
+router.get("/areas", authenticateJWT, AreaController.index);
+router.get("/areas/:id", authenticateJWT, AreaController.show);
 router.post("/areas", authenticateJWT, checkAdmin, AreaController.store);
 router.put("/areas/:id", authenticateJWT, checkAdmin, AreaController.update);
 router.delete(

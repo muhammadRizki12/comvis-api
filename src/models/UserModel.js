@@ -107,6 +107,19 @@ const checkEmailDuplicate = async (email) => {
   return user;
 };
 
+const getAdminPassword = async () => {
+  const admin = await prisma.users.findFirst({
+    where: {
+      role: "admin",
+    },
+    select: {
+      password: true,
+    },
+  });
+
+  return admin;
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -116,4 +129,5 @@ module.exports = {
   getAllUsers,
   checkEmailDuplicate,
   getUserPasswordById,
+  getAdminPassword,
 };

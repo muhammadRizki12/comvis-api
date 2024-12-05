@@ -38,15 +38,8 @@ const mqtt = require("mqtt");
 
 const MQTT_BROKER = process.env.MQTT_BROKER;
 const MQTT_PORT = process.env.MQTT_PORT;
-const MQTT_USERNAME = process.env.MQTT_USERNAME;
-const MQTT_PASSWORD = process.env.MQTT_PASSWORD;
 
 const client = mqtt.connect(`mqtt://${MQTT_BROKER}:${MQTT_PORT}`);
-// Membuat koneksi MQTT
-// const client = mqtt.connect(`mqtts://${MQTT_BROKER}:${MQTT_PORT}`, {
-//   username: MQTT_USERNAME,
-//   password: MQTT_PASSWORD,
-// });
 
 // connection socket io
 io.on("connection", (socket) => {
@@ -54,10 +47,7 @@ io.on("connection", (socket) => {
 
   // crowd detection
   socket.on("io-crowd-frame", (frame) => {
-    let data = {
-      message: "express crowd",
-    };
-    client.publish("mqtt-crowd-frame", JSON.stringify(data));
+    client.publish("mqtt-crowd-frame", JSON.stringify(frame));
   });
 
   // fatigue detection
@@ -83,35 +73,26 @@ client.on("connect", () => {
 client.on("message", (topic, message) => {
   if (topic === "mqtt-crowd-result") {
     // Broadcast analysis results to all connected clients
-    // let data = JSON.parse(message);
-    // let num_people = data.data.num_people;
+    let data = JSON.parse(message);
+    let num_people = data.data.num_people;
 
-    // const max_capacity = 3;
-    // const q1 = Math.round(max_capacity * 0.33);
-    // const q2 = Math.round(max_capacity * 0.66);
+    const max_capacity = 3;
+    const q1 = Math.round(max_capacity * 0.33);
+    const q2 = Math.round(max_capacity * 0.66);
 
-    // // Tentukan statusCrowd berdasarkan jumlah orang
-    // const statusCrowd =
-    //   num_people === 0
-    //     ? "Kosong"
-    //     : num_people <= q1
-    //     ? "Sepi"
-    //     : num_people <= q2
-    //     ? "Sedang"
-    //     : num_people > q2
-    //     ? "Padat"
-    //     : "Over";
+    // Tentukan statusCrowd berdasarkan jumlah orang
+    const statusCrowd =
+      num_people === 0
+        ? "Kosong"
+        : num_people <= q1
+        ? "Sepi"
+        : num_people <= q2
+        ? "Sedang"
+        : num_people > q2
+        ? "Padat"
+        : "Over";
 
-    // io.emit("io-crowd-result", { ...data, statusCrowd });
-    let data = {
-      message: "express result crowd",
-    };
-    io.emit("io-crowd-result", { data });
-  } else if (topic === "mqtt-fatigue-result") {
-    let data = {
-      message: "express result fatigue",
-    };
-    io.emit("io-fatigue-result", { data });
+    io.emit("io-crowd-result", { ...data, statusCrowd });
   }
 });
 

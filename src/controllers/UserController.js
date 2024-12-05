@@ -6,6 +6,7 @@ const {
   getAllUsers,
   deleteUserById,
   getUserPasswordById,
+  getAdminPassword,
 } = require("../models/UserModel");
 
 dotenv.config();
@@ -72,6 +73,14 @@ const update = async (req, res) => {
 
     const data = req.body;
 
+    const admin = await getAdminPassword();
+    const validatePasswordAdmin = await bcrypt.compare(
+      data.passwordAdmin,
+      admin.password
+    );
+
+    if (!validatePasswordAdmin) throw new Error("Not match password admin!");
+
     const user = await updateUser({
       id,
       ...data,
@@ -93,23 +102,40 @@ const update = async (req, res) => {
 
 const updateUserPassword = async (req, res) => {
   try {
+    // get data id from params
     const { id } = req.params;
 
+    // get data body
     const data = req.body;
 
+    // get admin password
+    const admin = await getAdminPassword();
+    // compare matching password admin
+    const validatePasswordAdmin = await bcrypt.compare(
+      data.passwordAdmin,
+      admin.password
+    );
+
+    // Check password admin
+    if (!validatePasswordAdmin) throw new Error("Not match password admin!");
+
+    // hash password
     const newPasswordHashing = await bcrypt.hash(data.password, 10);
 
+    // update user
     const updatedUser = await updateUser({
       id,
       password: newPasswordHashing,
     });
 
+    // return if success
     res.status(200).send({
       success: true,
       message: "User updated successfully",
       data: updatedUser,
     });
   } catch (error) {
+    // return if error
     res.status(400).send({
       message: error.message,
     });

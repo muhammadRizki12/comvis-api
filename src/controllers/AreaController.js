@@ -5,6 +5,7 @@ const {
   getAllAreas,
   updateArea,
   deleteAreaById,
+  getAreaById,
 } = require("../models/AreaModel");
 dotenv.config();
 
@@ -29,11 +30,10 @@ const store = async (req, res) => {
   try {
     const { name, capacity } = req.body;
 
-    if (checkNameAreaDuplicate(name)) {
+    if (await checkNameAreaDuplicate(name)) {
       throw new Error("Area is exist!");
     }
 
-    // validate
     if (!(name && capacity)) {
       throw new Error("Some fields are missing");
     }
@@ -100,4 +100,23 @@ const destroy = async (req, res) => {
   }
 };
 
-module.exports = { store, index, update, destroy };
+const show = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const area = await getAreaById(parseInt(id));
+
+    if (!area) throw new Error(`Invalid Get area id: ${id}`);
+
+    res.status(200).send({
+      message: "success",
+      data: area,
+    });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { store, index, update, destroy, show };
