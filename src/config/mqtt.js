@@ -1,36 +1,51 @@
 const mqtt = require("mqtt");
 
-const dotenv = require("dotenv");
-dotenv.config();
-
-const MQTT_BROKER = process.env.MQTT_BROKER;
-
-const MQTTClient = mqtt.connect(MQTT_BROKER, {
-  clientId: "express_mqtt_client_" + Math.random().toString(16).substr(2, 8),
-  clean: true,
-  connectTimeout: 4000,
-  reconnectPeriod: 1000,
-});
-
-MQTTClient.on("error", (error) => {
-  console.error("MQTT Client Error:", error);
-});
-
-MQTTClient.on("reconnect", () => {
-  console.log("Reconnecting to MQTT broker...");
-});
-
-MQTTClient.on("connect", () => {
-  MQTTClient.subscribe("video-analysis");
-});
-
-MQTTClient.on("message", (topic, message) => {
-  if (topic === "video-analysis") {
-    // io.emit("analysis-result", JSON.parse(message));
-    console.log(JSON.parse(message));
-  } else {
-    console.log("GAGAL");
+class MQTTConnection {
+  constructor() {
+    this.client = null;
   }
-});
 
-module.exports = MQTTClient;
+  connect(brokerUrl, options = {}) {
+    try {
+      this.client = mqtt.connect(brokerUrl, options);
+
+      this.client.on("connect", () => {
+        console.log("MQTT Connected");
+      });
+
+      this.client.on("error", (error) => {
+        console.error("MQTT Connection Error:", error);
+      });
+
+      return this.client;
+    } catch (error) {
+      console.error("Failed to establish MQTT connection:", error);
+      return null;
+    }
+  }
+
+  subscribe(topic, callback) {
+    if (this.client) {
+      this.client.subscribe(topic, (err) => {
+        if (err) {
+          console.error(`Error subscribing to ${topic}:`, err);
+        } else {
+          console.log(`Subscribed to ${topic}`);
+          this.client.on("message", (receivedTopic, message) => {
+            if (receivedTopic === topic) {
+              callback(message.toString());
+            }
+          });
+        }
+      });
+    }
+  }
+
+  publish(topic, message) {
+    if (this.client) {
+      this.client.publish(topic, message);
+    }
+  }
+}
+
+module.exports = new MQTTConnection();

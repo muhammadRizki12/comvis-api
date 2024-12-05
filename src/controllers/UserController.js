@@ -120,7 +120,7 @@ const updateUserPassword = async (req, res) => {
     if (!validatePasswordAdmin) throw new Error("Not match password admin!");
 
     // hash password
-    const newPasswordHashing = await bcrypt.hash(data.password, 10);
+    const newPasswordHashing = await bcrypt.hash(data.newUserPassword, 10);
 
     // update user
     const updatedUser = await updateUser({
