@@ -1,38 +1,31 @@
-const socketIo = require("socket.io");
+// const cors = require("cors");
 
-class SocketConnection {
-  constructor() {
-    this.io = null;
-    this.connectedSockets = new Set();
-  }
+let io;
 
-  initialize(server) {
-    this.io = socketIo(server);
+function initSocket(server) {
+  io = require("socket.io")(server, {
+    cors: { origin: "*", methods: ["GET", "POST"] },
+  });
 
-    this.io.on("connection", (socket) => {
-      console.log("New socket connected");
-      this.connectedSockets.add(socket.id);
+  io.on("connection", (socket) => {
+    console.log("User connected:", socket.id);
 
-      socket.on("disconnect", () => {
-        console.log("Socket disconnected");
-        this.connectedSockets.delete(socket.id);
-      });
+    // Tambahkan handler event di sini
+    socket.on("message", (data) => {
+      console.log("Message received:", data);
     });
 
-    return this.io;
-  }
-
-  emitToAll(event, data) {
-    if (this.io) {
-      this.io.emit(event, data);
-    }
-  }
-
-  emitToRoom(room, event, data) {
-    if (this.io) {
-      this.io.to(room).emit(event, data);
-    }
-  }
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+    });
+  });
 }
 
-module.exports = new SocketConnection();
+function getIO() {
+  if (!io) {
+    throw new Error("Socket.IO is not initialized!");
+  }
+  return io;
+}
+
+module.exports = { initSocket, getIO };

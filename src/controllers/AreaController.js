@@ -1,4 +1,6 @@
 const dotenv = require("dotenv");
+const { getIO } = require("../config/socket");
+
 const {
   insertArea,
   checkNameAreaDuplicate,
@@ -7,6 +9,9 @@ const {
   deleteAreaById,
   getAreaById,
 } = require("../models/AreaModel");
+
+const client = require("../config/mqtt");
+
 dotenv.config();
 
 const index = async (req, res) => {
@@ -102,16 +107,42 @@ const destroy = async (req, res) => {
 
 const show = async (req, res) => {
   try {
+    const io = getIO();
+
     const { id } = req.params;
 
     const area = await getAreaById(parseInt(id));
 
     if (!area) throw new Error(`Invalid Get area id: ${id}`);
 
-    res.status(200).send({
-      message: "success",
-      data: area,
+    io.on("connection", (socket) => {
+      socket.on("io-crowd-frame", (frame) => {
+        // send mqtt
+        client.publish("mqtt-crowd-frame", JSON.stringify(frame));
+      });
+
+      socket.on("io-fatigue-frame", (frame) => {
+        // send mqtt
+        client.publish("mqtt-fatigue-frame", JSON.stringify(frame));
+      });
     });
+
+    // receive analysis from flask
+    client.subscribe("mqtt-crowd-result", (message) => {
+      io.emit("io-crowd-result", { message });
+    });
+
+    // // receive analysis from flask
+    // client.subscribe("mqtt-fatigue-result", (message) => {
+    //   io.emit("io-fatigue-result", { message });
+    // });
+
+    res.render("index");
+
+    // res.status(200).send({
+    //   message: "success",
+    //   data: area,
+    // });
   } catch (error) {
     res.status(400).send({
       message: error.message,

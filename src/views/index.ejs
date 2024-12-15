@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      body {
+        margin: 0;
+        padding-bottom: 3rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <div id="container"> -->
+    <video autoplay="true" width="640" height="480" id="videoElement"></video>
+    <canvas id="canvas" style="display: none" width="640" height="480"></canvas>
+    <!-- </div> -->
+    <!-- Socket io -->
+    <script
+      src="https://cdn.socket.io/4.8.0/socket.io.min.js"
+      integrity="sha384-OoIbkvzsFFQAG88r+IqMAjyOtYDPGO0cqK5HF5Uosdy/zUEGySeAzytENMDynREd"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      // const socket = io("wss://comvis-api.netlify.app/");
+      const socket = io();
+      // https://3244-104-28-218-135.ngrok-free.app
+      // https://3244-104-28-218-135.ngrok-free.app
+
+      const video = document.getElementById("videoElement");
+      if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((stream) => (video.srcObject = stream))
+          .catch((error) => console.log(error.message));
+      }
+
+      const canvas = document.getElementById("canvas");
+      const context = canvas.getContext("2d");
+
+      setInterval(() => {
+        context.drawImage(video, 0, 0, 640, 480);
+
+        // frame
+        const frame = canvas.toDataURL("image/jpeg", 1); // Compress with 0.5 quality
+
+        socket.emit("io-crowd-frame", frame);
+      }, 1000); // Send frame every 100ms
+
+      // Receive analyzed results
+      socket.on("io-crowd-result", (result) => {
+        console.log("YOLO Detection:", result);
+        // Handle detection results here
+      });
+    </script>
+  </body>
+</html>

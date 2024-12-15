@@ -1,4 +1,9 @@
 const mqtt = require("mqtt");
+const dotenv = require("dotenv");
+dotenv.config();
+
+const MQTT_BROKER = process.env.MQTT_BROKER;
+const MQTT_PORT = process.env.MQTT_PORT;
 
 class MQTTConnection {
   constructor() {
@@ -6,8 +11,10 @@ class MQTTConnection {
   }
 
   connect(brokerUrl, options = {}) {
+    // connect(brokerUrl, options = {}) {
     try {
-      this.client = mqtt.connect(brokerUrl, options);
+      // this.client = mqtt.connect(`mqtt::/${MQTT_BROKER}:${MQTT_PORT}`, options);
+      this.client = mqtt.connect(brokerUrl);
 
       this.client.on("connect", () => {
         console.log("MQTT Connected");
