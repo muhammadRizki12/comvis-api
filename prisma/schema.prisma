@@ -11,7 +11,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model users {
@@ -24,17 +23,17 @@ model users {
 }
 
 model areas {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
   name String @unique
   capacity Int
   crowd crowds[]
 }
 
 model crowds {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
   status String
   count Int
   timestamp DateTime
-  area_id Int
+  area_id String
   area areas @relation(fields: [area_id], references: [id])
 }

@@ -65,7 +65,7 @@ const store = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
 
     const data = req.body;
 
@@ -92,7 +92,7 @@ const destroy = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const area = await deleteAreaById(parseInt(id));
+    const area = await deleteAreaById(id);
     if (!area) throw new Error("Invalid delete area");
 
     res.status(200).send({
@@ -111,7 +111,7 @@ const show = async (req, res) => {
 
     const { id } = req.params;
 
-    const area = await getAreaById(parseInt(id));
+    const area = await getAreaById(id);
 
     if (!area) throw new Error(`Invalid Get area id: ${id}`);
 
