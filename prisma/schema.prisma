@@ -33,7 +33,7 @@ model crowds {
   id String @id @default(cuid())
   status String
   count Int
-  timestamp DateTime
+  createdAt DateTime @db.Timestamp
   area_id String
   area areas @relation(fields: [area_id], references: [id])
 }
