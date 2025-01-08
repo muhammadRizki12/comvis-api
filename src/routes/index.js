@@ -20,6 +20,7 @@ const {
 } = require("../controllers/UserController");
 const AreaController = require("../controllers/AreaController");
 const CrowdController = require("../controllers/CrowdController");
+const FatigueController = require("../controllers/FatigueController");
 
 const router = express.Router();
 
@@ -58,7 +59,11 @@ router.delete(
 );
 
 // crowds
-router.get("/crowds", authenticateJWT, CrowdController.index);
+router.get("/crowds/:area_id", CrowdController.show);
+router.get("/crowds", CrowdController.index);
+
+// fatigue
+router.get("/fatigues", FatigueController.index);
 
 router.get("/", (req, res) => {
   return res.status(200).send({

@@ -1,4 +1,4 @@
-const { getAllcrowds } = require("../models/CrowdModel");
+const { getAllcrowds, getCrowdByAreaId } = require("../models/CrowdModel");
 
 const index = async (req, res) => {
   try {
@@ -17,4 +17,23 @@ const index = async (req, res) => {
   }
 };
 
-module.exports = { index };
+// select by area_id
+const show = async (req, res) => {
+  try {
+    const { area_id } = req.params;
+    const crowd = await getCrowdByAreaId(area_id);
+
+    if (!crowd) throw new Error("Invalid Get Crowd by ID");
+
+    res.status(200).send({
+      data: crowd,
+      message: "success",
+    });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { index, show };

@@ -12,7 +12,7 @@ class MQTTConnection {
     this.messageHandlers = new Map(); // Untuk menyimpan handler pesan per topic
 
     // Tetapkan pendengar maksimum default yang lebih tinggi
-    EventEmitter.defaultMaxListeners = 15;
+    EventEmitter.defaultMaxListeners = 1000;
   }
 
   connect(brokerUrl, options = {}) {
