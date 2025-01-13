@@ -19,12 +19,12 @@ const authenticateJWT = (req, res, next) => {
     // decode token
     const jwtDecode = jwt.verify(token, secret);
     req.user = jwtDecode;
+    next();
   } catch (error) {
     res.status(error.code || 400).send({
       message: error.message,
     });
   }
-  next();
 };
 
 module.exports = authenticateJWT;

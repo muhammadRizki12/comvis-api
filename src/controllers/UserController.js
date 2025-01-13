@@ -18,12 +18,12 @@ const index = async (req, res) => {
 
     if (!users) throw new Error("Invalid Get All users");
 
-    res.status(200).send({
+    return res.status(200).send({
       data: users,
       message: "success",
     });
   } catch (error) {
-    res.status(400).send({
+    return res.status(400).send({
       message: error.message,
     });
   }
@@ -38,12 +38,12 @@ const show = async (req, res) => {
 
     if (!user) throw new Error(`Invalid Get users id: ${id}`);
 
-    res.status(200).send({
+    return res.status(200).send({
       message: "success",
       data: user,
     });
   } catch (error) {
-    res.status(400).send({
+    return res.status(400).send({
       message: error.message,
     });
   }
@@ -57,11 +57,11 @@ const destroy = async (req, res) => {
 
     if (!user) throw new Error("Invalid delete user");
 
-    res.status(200).send({
+    return res.status(200).send({
       message: `Success delete user id: ${id}`,
     });
   } catch (error) {
-    res.status(400).send({
+    return res.status(400).send({
       message: error.message,
     });
   }
@@ -88,13 +88,13 @@ const update = async (req, res) => {
 
     if (!user) throw new Error("Failed update user!");
 
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       message: "User updated successfully",
       data: user,
     });
   } catch (error) {
-    res.status(400).send({
+    return res.status(400).send({
       message: error.message,
     });
   }
@@ -129,14 +129,14 @@ const updateUserPassword = async (req, res) => {
     });
 
     // return if success
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       message: "User updated successfully",
       data: updatedUser,
     });
   } catch (error) {
     // return if error
-    res.status(400).send({
+    return res.status(400).send({
       message: error.message,
     });
   }
@@ -152,12 +152,12 @@ const showProfile = async (req, res) => {
 
     if (!user) new Error("Error show profile");
 
-    res.status(200).send({
+    return res.status(200).send({
       data: user,
       message: "success",
     });
   } catch (error) {
-    res.status(400).send({
+    return res.status(400).send({
       message: error.message,
     });
   }
@@ -170,12 +170,12 @@ const updateProfile = async (req, res) => {
     // update data
     const user = await updateUser({ id, email, name });
 
-    res.status(200).send({
+    return res.status(200).send({
       status: "success",
       data: user,
     });
   } catch (error) {
-    res.status(error.code || 400).send({
+    return res.status(error.code || 400).send({
       message: error.message,
     });
   }
@@ -209,12 +209,12 @@ const updateProfilePassword = async (req, res) => {
     }
 
     // respon
-    res.status(200).send({
+    return res.status(200).send({
       data: userNewPass,
       message: "Edit Password Success",
     });
   } catch (error) {
-    res.status(error.code || 400).send({
+    return res.status(error.code || 400).send({
       message: error.message,
     });
   }

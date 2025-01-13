@@ -36,12 +36,12 @@ const register = async (req, res) => {
     const user = await insertUser(newUser);
 
     // respon
-    res.status(200).send({
+    return res.status(200).send({
       data: user,
       message: "Register Success",
     });
   } catch (error) {
-    res.status(400).send({
+    return res.status(400).send({
       message: error.message,
     });
   }

@@ -6,12 +6,12 @@ const index = async (req, res) => {
 
     if (!crowds) throw new Error("Invalid Get All area");
 
-    res.status(200).send({
+    return res.status(200).send({
       data: crowds,
       message: "success",
     });
   } catch (error) {
-    res.status(400).send({
+    return res.status(400).send({
       message: error.message,
     });
   }
@@ -25,12 +25,12 @@ const show = async (req, res) => {
 
     if (!crowd) throw new Error("Invalid Get Crowd by ID");
 
-    res.status(200).send({
+    return res.status(200).send({
       data: crowd,
       message: "success",
     });
   } catch (error) {
-    res.status(400).send({
+    return res.status(400).send({
       message: error.message,
     });
   }

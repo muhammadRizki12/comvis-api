@@ -59,8 +59,8 @@ router.delete(
 );
 
 // crowds
-router.get("/crowds/:area_id", CrowdController.show);
-router.get("/crowds", CrowdController.index);
+router.get("/crowds/:area_id", authenticateJWT, CrowdController.show);
+router.get("/crowds", authenticateJWT, CrowdController.index);
 
 // fatigue
 router.get("/fatigues", FatigueController.index);
