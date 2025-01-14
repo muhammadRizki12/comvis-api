@@ -45,6 +45,8 @@ app.set("view engine", "ejs");
 // Define the directory where your HTML files (views) are located
 app.set("views", path.join(__dirname, "views"));
 
+// app.use(express.json({ limit: "100mb" }));
+
 // routes
 app.use("/", router);
 

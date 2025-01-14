@@ -6,7 +6,11 @@ const {
   resetPassword,
 } = require("../controllers/AuthController");
 
-const { checkAdmin, authenticateJWT } = require("../middleware");
+const {
+  checkAdmin,
+  authenticateJWT,
+  uploadMiddleware,
+} = require("../middleware");
 
 const {
   index,
@@ -26,7 +30,7 @@ const router = express.Router();
 
 // auth
 router.post("/login", login);
-router.post("/register", register);
+router.post("/register", uploadMiddleware.upload.array("photos", 12), register);
 router.patch("/resetPassword", resetPassword);
 
 // Admin
@@ -64,6 +68,9 @@ router.get("/crowds", authenticateJWT, CrowdController.index);
 
 // fatigue
 router.get("/fatigues", FatigueController.index);
+
+// photo
+router.post("/upload", FatigueController.upload);
 
 router.get("/", (req, res) => {
   return res.status(200).send({

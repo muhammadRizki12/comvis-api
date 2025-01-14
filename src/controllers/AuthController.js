@@ -7,21 +7,25 @@ const {
 } = require("../models/UserModel");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
+const { uploadMiddleware } = require("../middleware");
 
 dotenv.config();
 
 const register = async (req, res) => {
   try {
     const { email, name, password, security_answer } = req.body;
+    const photos = req.files;
+
+    if ((await checkEmailDuplicate(email)) !== null) {
+      throw new Error("Email is exist!");
+    }
 
     // Check
-    if (!(email && name && password && security_answer)) {
+    if (!(email && name && password && security_answer && photos.length)) {
       throw new Error("Some fields are missing");
     }
 
-    if (!checkEmailDuplicate(email)) {
-      throw new Error("Email is exist!");
-    }
+    // uploadMiddleware.upload.array("photos", 12);
 
     const passwordHashing = await bcrypt.hash(password, 10);
 

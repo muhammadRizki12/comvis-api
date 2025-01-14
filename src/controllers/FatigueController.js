@@ -24,4 +24,23 @@ const index = (req, res) => {
   }
 };
 
-module.exports = { index };
+const upload = (req, res) => {
+  try {
+    if (!req.file) {
+      new Error("Please upload a file!");
+    }
+
+    const fileName = req.file.filename;
+    console.log(fileName);
+
+    return res.status(200).send({
+      status: "success",
+    });
+  } catch (error) {
+    return res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { index, upload };
