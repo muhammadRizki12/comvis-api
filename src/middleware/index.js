@@ -1,5 +1,5 @@
 const checkAdmin = require("./checkAdmin");
 const authenticateJWT = require("./authenticateJWT");
-const uploadMiddleware = require("./uploadMiddleware");
+const uploadPhotosMiddleware = require("./uploadPhotosMiddleware");
 
-module.exports = { checkAdmin, authenticateJWT, uploadMiddleware };
+module.exports = { checkAdmin, authenticateJWT, uploadPhotosMiddleware };

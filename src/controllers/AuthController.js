@@ -8,93 +8,51 @@ const {
 
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
+
 const path = require("path");
-const multer = require("multer");
 const fs = require("fs");
 
 dotenv.config();
 
-// storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // PR
-    cb(null, path.join(__dirname, "../public/user-photos"));
-    // cb(null, "uploads/photos"); // Pastikan folder ini sudah dibuat
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${file.originalname}`);
-  },
-});
-
-// filter
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
-    cb(null, true);
-  } else {
-    cb(new Error("Not an image! Please upload only images."), false);
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-    files: 10, // maksimum 50 file
-  },
-});
-
-// Middleware untuk handle multiple file upload
-const uploadPhotos = upload.array("photos");
-
 const register = async (req, res) => {
-  // Gunakan promise untuk handle multer upload
-  const multerPromise = () => {
-    return new Promise((resolve, reject) => {
-      uploadPhotos(req, res, (err) => {
-        if (err) {
-          reject(err);
-        }
-        resolve();
-      });
-    });
-  };
-
   try {
-    await multerPromise();
-
+    // get request body
     const { email, name, password, security_answer } = req.body;
 
-    if ((await checkEmailDuplicate(email)) !== null) {
-      throw new Error("Email is exist!");
-    }
-
+    // Validasi req.body
     if (!(email && name && password && security_answer)) {
       throw new Error("Some fields are missing");
     }
 
-    // 2. Validasi req.files
-    const photos = req.files;
-    console.log(photos);
+    // Validasi email yang sudah terdaftar
+    if ((await checkEmailDuplicate(email)) !== null) {
+      throw new Error("Email is exist!");
+    }
 
+    // Handle file uploads
+    const photos = req.files;
     if (!photos || photos.length === 0) {
       throw new Error("No photos uploaded");
     }
 
+    // Hashing password
     const passwordHashing = await bcrypt.hash(password, 10);
+
+    // create new user
     const newUser = {
       name,
       email,
       password: passwordHashing,
       security_answer,
     };
+
     // insert database
     const user = await insertUser(newUser);
 
     // Buat folder berdasarkan user.id
     const userFolder = path.join(__dirname, "../public/user-photos", user.id);
-    console.log(userFolder);
 
+    // Cek apakah folder user.id sudah ada
     if (!fs.existsSync(userFolder)) {
       fs.mkdirSync(userFolder, { recursive: true });
     }

@@ -9,7 +9,7 @@ const {
 const {
   checkAdmin,
   authenticateJWT,
-  uploadMiddleware,
+  uploadPhotosMiddleware,
 } = require("../middleware");
 
 const {
@@ -30,8 +30,11 @@ const router = express.Router();
 
 // auth
 router.post("/login", login);
-// router.post("/register", register);
-router.post("/register", register);
+router.post(
+  "/register",
+  uploadPhotosMiddleware.upload.array("photos"),
+  register
+);
 router.patch("/resetPassword", resetPassword);
 
 // Admin
