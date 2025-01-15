@@ -5,7 +5,13 @@ const fs = require("fs");
 // Konfigurasi penyimpanan multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, "../public/images"); // Perhatikan path ke folder uploads
+    const userId = req.body?.id || "default";
+
+    const uploadDir = path.join(
+      __dirname,
+      "../public/images",
+      userId.toString()
+    ); // Perhatikan path ke folder uploads
 
     // Buat folder 'uploads' jika belum ada
     if (!fs.existsSync(uploadDir)) {

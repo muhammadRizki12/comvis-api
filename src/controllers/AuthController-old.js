@@ -5,129 +5,50 @@ const {
   updateUser,
   checkEmailDuplicate,
 } = require("../models/UserModel");
-
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
-const path = require("path");
-const multer = require("multer");
-const fs = require("fs");
-
 dotenv.config();
 
-// storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // PR
-    cb(null, path.join(__dirname, "../public/user-photos"));
-    // cb(null, "uploads/photos"); // Pastikan folder ini sudah dibuat
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${file.originalname}`);
-  },
-});
-
-// filter
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
-    cb(null, true);
-  } else {
-    cb(new Error("Not an image! Please upload only images."), false);
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-    files: 10, // maksimum 50 file
-  },
-});
-
-// Middleware untuk handle multiple file upload
-const uploadPhotos = upload.array("photos");
-
-const register = async (req, res) => {
-  // Gunakan promise untuk handle multer upload
-  const multerPromise = () => {
-    return new Promise((resolve, reject) => {
-      uploadPhotos(req, res, (err) => {
-        if (err) {
-          reject(err);
-        }
-        resolve();
-      });
-    });
-  };
-
+// REGISTER
+const register = async (req, res, next) => {
   try {
-    await multerPromise();
-
     const { email, name, password, security_answer } = req.body;
+    const photos = req.files;
 
     if ((await checkEmailDuplicate(email)) !== null) {
       throw new Error("Email is exist!");
     }
 
-    if (!(email && name && password && security_answer)) {
+    // Check
+    if (!(email && name && password && security_answer && photos.length)) {
       throw new Error("Some fields are missing");
     }
 
-    // 2. Validasi req.files
-    const photos = req.files;
-    console.log(photos);
-
-    if (!photos || photos.length === 0) {
-      throw new Error("No photos uploaded");
-    }
-
     const passwordHashing = await bcrypt.hash(password, 10);
+
     const newUser = {
+      id: Date.now(),
       name,
       email,
       password: passwordHashing,
       security_answer,
     };
+
     // insert database
     const user = await insertUser(newUser);
 
-    // Buat folder berdasarkan user.id
-    const userFolder = path.join(__dirname, "../public/user-photos", user.id);
-    console.log(userFolder);
-
-    if (!fs.existsSync(userFolder)) {
-      fs.mkdirSync(userFolder, { recursive: true });
-    }
-
-    // Pindahkan file dari folder sementara ke folder user.id
-    const photoPaths = [];
-    await Promise.all(
-      photos.map((photo) => {
-        const targetPath = path.join(userFolder, photo.filename);
-        photoPaths.push(targetPath);
-        return fs.promises.rename(photo.path, targetPath);
-      })
-    );
-
-    // respon
+    respon;
     return res.status(200).send({
       data: user,
       message: "Register Success",
-      photos: photoPaths,
     });
   } catch (error) {
-    // Hapus file sementara jika terjadi error
-    if (req.files) {
-      await Promise.all(
-        req.files.map((file) => fs.promises.unlink(file.path).catch(() => {}))
-      );
-    }
-
     return res.status(400).send({
       message: error.message,
     });
   }
 };
+// END REGISTER
 
 const login = async (req, res) => {
   try {

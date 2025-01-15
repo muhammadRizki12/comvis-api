@@ -30,7 +30,8 @@ const router = express.Router();
 
 // auth
 router.post("/login", login);
-router.post("/register", uploadMiddleware.upload.array("photos", 12), register);
+// router.post("/register", register);
+router.post("/register", register);
 router.patch("/resetPassword", resetPassword);
 
 // Admin

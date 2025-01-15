@@ -96,7 +96,7 @@ const deleteUserById = async (id) => {
 const checkEmailDuplicate = async (email) => {
   const user = await prisma.users.findUnique({
     where: {
-      email: email.toLowerCase(), // Convert ke lowercase untuk konsistensi
+      email,
     },
     select: {
       id: true,
