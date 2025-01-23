@@ -77,9 +77,7 @@ router.get("/fatigues", FatigueController.index);
 router.post("/upload", FatigueController.upload);
 
 router.get("/", (req, res) => {
-  return res.status(200).send({
-    message: "Hello world",
-  });
+  return res.render("index");
 });
 
 module.exports = router;

@@ -2,32 +2,78 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const { initSocket } = require("./config/socket");
-const mqtt = require("./config/mqtt");
 
-// access .env
+const { formatInTimeZone, format } = require("date-fns-tz");
+const timeZone = "Asia/Jakarta";
+
 dotenv.config();
+
+const MQTT_BROKER = process.env.MQTT_BROKER;
+const MQTT_PORT = process.env.MQTT_PORT;
+const PORT = process.env.PORT;
 
 const router = require("./routes/index");
 const path = require("path");
 
-// inisialisasi server
 const app = express();
 const server = http.createServer(app);
 
-// Inisialisasi Socket.IO
-initSocket(server);
+// socket init
+const socketIO = require("socket.io");
+const io = socketIO(server, {
+  cors: { origin: "*", methods: ["GET", "POST"] },
+});
 
-const MQTT_BROKER = process.env.MQTT_BROKER;
-const MQTT_PORT = process.env.MQTT_PORT;
+// MQTT // socket init
+const mqtt = require("mqtt");
+const client = mqtt.connect("mqtt://localhost:1883");
+client.on("connect", () => {
+  client.subscribe("mqtt-crowd-result");
+});
 
-// inisialisasi mqtt
-mqtt.connect(`mqtt://${MQTT_BROKER}:${MQTT_PORT}`);
+let data = {
+  count: 0,
+  createdAt: formatInTimeZone(
+    Date.now(),
+    timeZone,
+    "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"
+  ),
+};
+let clientId = "";
+// Socket.IO Connection and Events
+io.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
 
-// get port
-const PORT = process.env.PORT;
+  socket.on("io-crowd-frame", (frame) => {
+    // Simpan socket.id dari client yang mengirim
+    clientId = socket.id;
 
-// cors
+    // Kirim ke Analitik
+    client.publish("mqtt-crowd-frame", JSON.stringify(frame));
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
+});
+
+client.on("message", (topic, message) => {
+  if (topic === "mqtt-crowd-result") {
+    const result = JSON.parse(message);
+    data = {
+      ...data,
+      detection_data: result.detection_data,
+      count: result.num_people,
+    };
+
+    // Mengirim hasil hanya ke client yang mengirim permintaan asli.
+    // Misalkan clientId disimpan sebelumnya dalam scope yang dapat diakses
+    if (clientId) {
+      io.to(clientId).emit("io-crowd-result", data);
+    }
+  }
+});
+
 app.use(
   cors({
     origin: "*",
@@ -36,25 +82,15 @@ app.use(
   })
 );
 
-// middleware use json response
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Set EJS as the view engine
 app.set("view engine", "ejs");
-
-// Define the directory where your HTML files (views) are located
 app.set("views", path.join(__dirname, "views"));
 
-// routes
 app.use("/", router);
-
-// Optionally, you can define a static files directory (CSS, JS, images, etc.)
 app.use(express.static(path.join(__dirname, "public")));
 
-// server run
 server.listen(PORT, () => {
   console.log(`Running server in http://localhost:${PORT}`);
 });
-
-module.exports = server;

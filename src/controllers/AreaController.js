@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 const { formatInTimeZone, format } = require("date-fns-tz");
 const timeZone = "Asia/Jakarta";
 
-const { getIO } = require("../config/socket");
+const socket = require("../config/socket");
 
 const {
   insertArea,
@@ -111,89 +111,12 @@ const destroy = async (req, res) => {
 
 const show = async (req, res) => {
   try {
-    const io = getIO();
     const { id } = req.params;
     const area = await getAreaById(id);
 
     if (!area) {
       throw new Error(`Invalid Get area id: ${id}`);
     }
-
-    // Initialize data outside the MQTT callback to avoid unnecessary reassignments
-    let data = {
-      status: "Kosong", // Initial status
-      count: 0, // Initial count
-      area_id: area.id,
-      createdAt: formatInTimeZone(
-        Date.now(),
-        timeZone,
-        "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"
-      ),
-    };
-
-    io.on("connection", (socket) => {
-      socket.on("io-crowd-frame", (frame) => {
-        client.publish("mqtt-crowd-frame", JSON.stringify(frame));
-      });
-
-      // Emit initial data to the connected client
-      socket.emit("io-crowd-result", {
-        detection_data: [], // You might want to send initial detection data as well
-        ...data,
-      });
-
-      socket.on("disconnect", () => {
-        data.count = 0; // Reset count when the client disconnects
-      });
-    });
-
-    client.subscribe("mqtt-crowd-result", (message) => {
-      const result = JSON.parse(message);
-      const num_people = result.num_people;
-      const max_capacity = area.capacity;
-
-      // Calculate thresholds once outside the loop
-      const q1 = Math.round(max_capacity * 0.33);
-      const q2 = Math.round(max_capacity * 0.66);
-
-      // Simplified status determination using a lookup table
-      const statusMap = {
-        0: "Kosong",
-        1: "Sepi",
-        2: "Sedang",
-        3: "Padat",
-      };
-      const statusKey =
-        num_people === 0 ? 0 : num_people <= q1 ? 1 : num_people <= q2 ? 2 : 3;
-      const statusCrowd = statusMap[statusKey] || "Over";
-
-      data = {
-        ...data, // Reuse existing data
-        status: statusCrowd,
-        count: num_people,
-        createdAt: formatInTimeZone(
-          Date.now(),
-          timeZone,
-          "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"
-        ),
-      };
-
-      io.emit("io-crowd-result", {
-        detection_data: result.detection_data,
-        ...data,
-      });
-    });
-
-    // Interval to save data
-    setInterval(async () => {
-      if (data.count >= 1) {
-        try {
-          await insertCrowd(data);
-        } catch (error) {
-          console.error("Failed to save data:", error);
-        }
-      }
-    }, 5000);
 
     return res.status(200).send({
       message: "success",
