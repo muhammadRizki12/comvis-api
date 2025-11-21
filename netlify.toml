@@ -1,8 +1,0 @@
-[build]
-  command = "npm install && npx prisma generate"
-  functions = "netlify/functions"
-
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server/:splat"
-  status = 200

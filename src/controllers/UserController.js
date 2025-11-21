@@ -8,6 +8,8 @@ const {
   getUserPasswordById,
   getAdminPassword,
 } = require("../models/UserModel");
+const { deleteDirectory } = require("../utils/deleteDirectory");
+const { execFile } = require("child_process");
 
 dotenv.config();
 
@@ -54,9 +56,24 @@ const destroy = async (req, res) => {
     const { id } = req.params;
 
     const user = await deleteUserById(id);
-
     if (!user) throw new Error("Invalid delete user");
 
+    deleteDirectory(
+      `D:/magang/comvis/crowd_control_web/face-recognition/datasets/data/${id}`
+    );
+    deleteDirectory(
+      `D:/magang/comvis/crowd_control_web/face-recognition/datasets/backup/${id}`
+    );
+
+    // Panggil script Python untuk training
+    const pythonScript = "../crowd_control_web/face-recognition/del_persons.py";
+
+    execFile("python", [pythonScript], (error, stdout, stderr) => {
+      if (error) {
+        console.error("Error executing Python script:", stderr);
+      }
+      console.log("Python script output:", stdout);
+    });
     return res.status(200).send({
       message: `Success delete user id: ${id}`,
     });
@@ -81,10 +98,7 @@ const update = async (req, res) => {
 
     if (!validatePasswordAdmin) throw new Error("Not match password admin!");
 
-    const user = await updateUser({
-      id,
-      ...data,
-    });
+    const user = await updateUser({ id, ...data });
 
     if (!user) throw new Error("Failed update user!");
 
@@ -110,6 +124,7 @@ const updateUserPassword = async (req, res) => {
 
     // get admin password
     const admin = await getAdminPassword();
+
     // compare matching password admin
     const validatePasswordAdmin = await bcrypt.compare(
       data.passwordAdmin,
@@ -146,7 +161,6 @@ const updateUserPassword = async (req, res) => {
 const showProfile = async (req, res) => {
   try {
     // ambil data dari JWT
-    // const user = req.user;
     const id = req.user.id;
     const user = await getUserById(id);
 
@@ -167,6 +181,7 @@ const updateProfile = async (req, res) => {
   try {
     const { email, name } = req.body;
     const { id } = req.user;
+
     // update data
     const user = await updateUser({ id, email, name });
 
@@ -208,7 +223,6 @@ const updateProfilePassword = async (req, res) => {
       throw new Error("Failed edit password");
     }
 
-    // respon
     return res.status(200).send({
       data: userNewPass,
       message: "Edit Password Success",

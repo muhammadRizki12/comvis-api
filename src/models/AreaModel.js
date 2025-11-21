@@ -1,15 +1,7 @@
 const prisma = require("../config/db");
 
 const insertArea = async (areaData) => {
-  const { name, capacity } = areaData;
-  const area = await prisma.areas.create({
-    data: {
-      name,
-      capacity,
-    },
-  });
-
-  return area;
+  return await prisma.areas.create({ data: areaData });
 };
 
 const getAllAreas = async () => {
@@ -19,34 +11,22 @@ const getAllAreas = async () => {
 const updateArea = async (areaData) => {
   const { id, name, capacity } = areaData;
 
-  const area = await prisma.areas.update({
-    where: {
-      id,
-    },
-
-    data: {
-      name,
-      capacity,
-    },
+  return await prisma.areas.update({
+    where: { id },
+    data: { name, capacity },
   });
-
-  return area;
 };
 
 const deleteAreaById = async (id) => {
-  const area = await prisma.areas.delete({
-    where: { id },
-  });
-
-  return area;
+  return await prisma.areas.delete({ where: { id } });
 };
 
 const getAreaById = async (id) => {
-  const area = await prisma.areas.findUnique({
-    where: { id },
-  });
+  return await prisma.areas.findUnique({ where: { id } });
+};
 
-  return area;
+const getAreaByUserId = async (user_id) => {
+  return await prisma.areas.findMany({ where: { user_id } });
 };
 
 const checkNameAreaDuplicate = async (name) => {
@@ -64,4 +44,5 @@ module.exports = {
   updateArea,
   deleteAreaById,
   getAreaById,
+  getAreaByUserId,
 };

@@ -38,8 +38,8 @@ const getUserByEmail = async (email) => {
 };
 
 const insertUser = async (userData) => {
-  const { name, email, password, role, security_answer } = userData;
-  const user = await prisma.users.create({
+  const { name, email, password, security_answer } = userData;
+  return (user = await prisma.users.create({
     data: {
       name: name,
       email: email,
@@ -47,77 +47,38 @@ const insertUser = async (userData) => {
       role: "user",
       security_answer: security_answer,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-    },
-  });
-
-  return user;
+    select: { id: true, name: true, email: true, role: true },
+  }));
 };
 
 // update
 const updateUser = async (userData) => {
   const { id, name, email, password, security_answer } = userData;
-
-  const user = await prisma.users.update({
-    where: {
-      id,
-    },
-
-    data: {
-      name,
-      email,
-      password,
-      security_answer,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-    },
+  return await prisma.users.update({
+    where: { id },
+    data: { name, email, password, security_answer },
+    select: { id: true, name: true, email: true },
   });
-
-  return user;
 };
 
 const deleteUserById = async (id) => {
-  const user = await prisma.users.delete({
-    where: {
-      id,
-    },
+  return await prisma.users.delete({
+    where: { id },
   });
-
-  return user;
 };
 
 const checkEmailDuplicate = async (email) => {
-  const user = await prisma.users.findUnique({
-    where: {
-      email,
-    },
-    select: {
-      id: true,
-      email: true,
-    },
+  return await prisma.users.findUnique({
+    where: { email },
+    select: { id: true, email: true },
   });
-
-  return user;
 };
 
 const getAdminPassword = async () => {
-  const admin = await prisma.users.findFirst({
-    where: {
-      role: "admin",
-    },
-    select: {
-      password: true,
-    },
+  return await prisma.users.findFirst({
+    where: { role: "admin" },
+    select: { password: true },
   });
-
-  return admin;
 };
 
 module.exports = {

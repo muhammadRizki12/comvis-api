@@ -1,46 +1,47 @@
-const client = require("../config/mqtt");
-const { getIO } = require("../config/socket");
+const {
+  getAllFatigues,
+  getFatigueByUserId,
+  insertFatigue,
+} = require("../models/FatigueModel");
 
-const index = (req, res) => {
+const index = async (req, res) => {
   try {
-    const io = getIO();
+    const fatigues = await getAllFatigues();
+    if (!fatigues) throw new Error("Invalid Get All fatigue");
 
-    // menerima data dari client
-    io.on("connection", (socket) => {
-      socket.on("io-fatigue-frame", (frame) => {
-        client.publish("mqtt-fatigue-frame", JSON.stringify(frame));
-      });
-    });
-
-    // menerima analysis dari flask
-    client.subscribe("mqtt-fatigue-result", (message) => {
-      const data = JSON.parse(message.toString());
-      io.emit("io-fatigue-result", data);
-    });
+    return res.status(200).send({ data: fatigues, message: "success" });
   } catch (error) {
-    return res.status(400).send({
-      message: error.message,
-    });
+    return res.status(400).send({ message: error.message });
   }
 };
 
-const upload = (req, res) => {
+// select by user_id
+const show = async (req, res) => {
   try {
-    if (!req.file) {
-      new Error("Please upload a file!");
-    }
+    const { user_id } = req.params;
+    const fatigue = await getFatigueByUserId(user_id);
+    if (!fatigue) throw new Error("Invalid Get fatigues by user id");
 
-    const fileName = req.file.filename;
-    console.log(fileName);
+    return res.status(200).send({ data: fatigue, message: "success" });
+  } catch (error) {
+    return res.status(400).send({ message: error.message });
+  }
+};
+
+const store = async (req, res) => {
+  try {
+    const data = req.body;
+
+    const fatigue = await insertFatigue(data);
+    if (!fatigue) throw new Error("Failed insert fatigue!");
 
     return res.status(200).send({
-      status: "success",
+      data: fatigue,
+      message: "Insert fatigue succesful",
     });
   } catch (error) {
-    return res.status(400).send({
-      message: error.message,
-    });
+    return res.status(400).send({ message: error.message });
   }
 };
 
-module.exports = { index, upload };
+module.exports = { index, show, store };

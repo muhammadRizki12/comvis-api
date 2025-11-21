@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,20 +14,32 @@ model users {
   name String
   role String
   security_answer String
+  area areas[]
+  fatigue fatigues[]
 }
 
 model areas {
   id String @id @default(cuid())
-  name String @unique
+  name String
   capacity Int
+  user_id String
   crowd crowds[]
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model crowds {
   id String @id @default(cuid())
-  status String
   count Int
   createdAt DateTime @db.Timestamp
+  status String
   area_id String
-  area areas @relation(fields: [area_id], references: [id])
+  area areas @relation(fields: [area_id], references: [id], onDelete: Cascade)
+}
+
+model fatigues {
+  id String @id @default(cuid())
+  status String
+  createdAt DateTime @db.Timestamp
+  user_id String
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }

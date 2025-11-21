@@ -46,11 +46,11 @@
         // frame
         const frame = canvas.toDataURL("image/jpeg", 1); // Compress with 0.5 quality
 
-        socket.emit("io-crowd-frame", frame, 3, "cm6f2p5jm0001jk5w1jkvbz7b");
+        socket.emit("io-fatigue-frame", frame, "cm6f0wubx0000jky0her8gg2q");
       }, 1000); // Send frame every 100ms
 
       // Receive analyzed results
-      socket.on("io-crowd-result", (result) => {
+      socket.on("io-fatigue-result", (result) => {
         console.log("YOLO Detection:", result);
         // Handle detection results here
       });

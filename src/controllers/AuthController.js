@@ -11,6 +11,8 @@ const jwt = require("jsonwebtoken");
 
 const path = require("path");
 const fs = require("fs");
+const { execFile } = require("child_process");
+const { deleteDirectory } = require("../utils/deleteDirectory");
 
 dotenv.config();
 
@@ -39,18 +41,19 @@ const register = async (req, res) => {
     const passwordHashing = await bcrypt.hash(password, 10);
 
     // create new user
-    const newUser = {
-      name,
-      email,
-      password: passwordHashing,
-      security_answer,
-    };
+    const newUser = { name, email, password: passwordHashing, security_answer };
 
     // insert database
     const user = await insertUser(newUser);
 
-    // Buat folder berdasarkan user.id
-    const userFolder = path.join(__dirname, "../public/user-photos", user.id);
+    const dirFaceRecognition = path.resolve(
+      __dirname,
+      `../../../crowd_fatigue_detection_web/face-recognition`
+    );
+
+    const dirDatasets = path.join(dirFaceRecognition, "datasets");
+
+    const userFolder = path.join(dirDatasets, "new_persons", `${user.id}`);
 
     // Cek apakah folder user.id sudah ada
     if (!fs.existsSync(userFolder)) {
@@ -67,11 +70,23 @@ const register = async (req, res) => {
       })
     );
 
-    // respon
+    deleteDirectory(`${dirDatasets}/face_features/feature.npz`);
+
+    // Panggil script Python untuk training
+    const pythonScript = `${dirFaceRecognition}/add_persons.py`;
+    // const pythonScript1 = "../crowd_control_web/face-recognition/app.py";
+
+    execFile("python", [pythonScript], (error, stdout, stderr) => {
+      if (error) {
+        console.error("Error executing Python script:", stderr);
+      }
+      console.log("Python script output:", stdout);
+    });
+
     return res.status(200).send({
-      data: user,
+      // data: user,
       message: "Register Success",
-      photos: photoPaths,
+      // photos: photoPaths,
     });
   } catch (error) {
     // Hapus file sementara jika terjadi error

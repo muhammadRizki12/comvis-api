@@ -1,10 +1,6 @@
 const express = require("express");
 
-const {
-  register,
-  login,
-  resetPassword,
-} = require("../controllers/AuthController");
+const AuthController = require("../controllers/AuthController");
 
 const {
   checkAdmin,
@@ -12,16 +8,7 @@ const {
   uploadPhotosMiddleware,
 } = require("../middleware");
 
-const {
-  index,
-  show,
-  destroy,
-  update,
-  showProfile,
-  updateProfile,
-  updateUserPassword,
-  updateProfilePassword,
-} = require("../controllers/UserController");
+const UserController = require("../controllers/UserController");
 const AreaController = require("../controllers/AreaController");
 const CrowdController = require("../controllers/CrowdController");
 const FatigueController = require("../controllers/FatigueController");
@@ -29,55 +16,79 @@ const FatigueController = require("../controllers/FatigueController");
 const router = express.Router();
 
 // auth
-router.post("/login", login);
+router.post("/login", AuthController.login);
 router.post(
   "/register",
   uploadPhotosMiddleware.upload.array("photos"),
-  register
+  AuthController.register
 );
-router.patch("/resetPassword", resetPassword);
+router.patch("/resetPassword", AuthController.resetPassword);
 
 // Admin
-router.get("/admin/users", authenticateJWT, checkAdmin, index);
-router.get("/admin/users/:id", authenticateJWT, checkAdmin, show);
-router.patch("/admin/users/:id", authenticateJWT, checkAdmin, update);
+router.get("/admin/users", authenticateJWT, checkAdmin, UserController.index);
+router.get(
+  "/admin/users/:id",
+  authenticateJWT,
+  checkAdmin,
+  UserController.show
+);
+router.patch(
+  "/admin/users/:id",
+  authenticateJWT,
+  checkAdmin,
+  UserController.update
+);
 router.patch(
   "/admin/users/:id/editPassword",
   authenticateJWT,
   checkAdmin,
-  updateUserPassword
+  UserController.updateUserPassword
 );
-router.delete("/admin/users/:id", authenticateJWT, checkAdmin, destroy);
+router.delete(
+  "/admin/users/:id",
+  authenticateJWT,
+  checkAdmin,
+  UserController.destroy
+);
 
 // Users
-router.get("/users/profile", authenticateJWT, showProfile);
-router.patch("/users/profile", authenticateJWT, updateProfile);
-router.patch("/users/editPassword", authenticateJWT, updateProfilePassword);
+router.get("/users/profile", authenticateJWT, UserController.showProfile);
+router.patch("/users/profile", authenticateJWT, UserController.updateProfile);
+router.patch(
+  "/users/editPassword",
+  authenticateJWT,
+  UserController.updateProfilePassword
+);
 
 // areas
 router.get("/areas", authenticateJWT, AreaController.index);
-router.get("/areas/:id", AreaController.show);
-router.post("/areas", authenticateJWT, checkAdmin, AreaController.store);
-router.put("/areas/:id", authenticateJWT, checkAdmin, AreaController.update);
-router.delete(
-  "/areas/:id",
+router.get("/areas/:id", authenticateJWT, AreaController.show);
+router.get(
+  "/areas/users/:user_id",
   authenticateJWT,
-  checkAdmin,
-  AreaController.destroy
+  AreaController.areaByUserId
 );
+router.post("/areas", authenticateJWT, AreaController.store);
+router.put("/areas/:id", authenticateJWT, AreaController.update);
+router.delete("/areas/:id", authenticateJWT, AreaController.destroy);
 
 // crowds
-router.get("/crowds/:area_id", authenticateJWT, CrowdController.show);
 router.get("/crowds", authenticateJWT, CrowdController.index);
+router.post("/crowds", authenticateJWT, CrowdController.store);
+router.get("/crowds/:area_id", authenticateJWT, CrowdController.show);
+router.get(
+  "/crowds/users/:user_id",
+  authenticateJWT,
+  CrowdController.crowdByUserId
+);
 
 // fatigue
-router.get("/fatigues", FatigueController.index);
-
-// photo
-router.post("/upload", FatigueController.upload);
+router.get("/fatigues", authenticateJWT, FatigueController.index);
+router.get("/fatigues/users/:user_id", authenticateJWT, FatigueController.show);
+router.post("/fatigues", authenticateJWT, FatigueController.store);
 
 router.get("/", (req, res) => {
-  return res.render("index");
+  return res.render("fatigue");
 });
 
 module.exports = router;

@@ -3,7 +3,13 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../public/user-photos"));
+    cb(
+      null,
+      path.resolve(
+        __dirname,
+        "../../../crowd_fatigue_detection_web/face-recognition/datasets/new_persons"
+      )
+    );
   },
   filename: (req, file, cb) => {
     cb(null, `${file.originalname}`);
